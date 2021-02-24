@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 9411:9411
+    networks:
+      - confoo
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - 27017:27017
+    networks:
+      - confoo
+
+  todos:
+    image: quarkus/todosapi:latest
+    ports:
+      - 8080:8080
+    environment:
+      QUARKUS_LOG_LEVEL: DEBUG
+      QUARKUS_MONGODB_CONNECTION_STRING: mongodb://host.docker.internal:27017
+      QUARKUS_JAEGER_ENDPOINT: http://docker.for.mac.host.internal:14268/api/traces
+      QUARKUS_JAEGER_SERVICE_NAME: TOTOTO
+    networks:
+      - confoo
+    depends_on:
+      - mongo
+
+networks:
+  confoo:
